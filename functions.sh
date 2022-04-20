@@ -1,5 +1,5 @@
 #!/bin/bash
 
 load_env() {
-  cat .env >> ${GITHUB_ENV}
+  grep -v -e '^#' -e '^\s*$' .env >> ${GITHUB_ENV}
 }
