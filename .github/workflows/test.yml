@@ -1,11 +1,8 @@
-name: test
+name: x86_64-ssr+_v2s
 on:
   workflow_dispatch:
 
 env:
-  TZ: Asia/Shanghai
-  REPO_URL: https://git.openwrt.org/openwrt/openwrt.git
-  REPO_BRANCH: master
   CONFIG_PATH: x86_64-ssr+_v2s
 
 jobs:
@@ -15,6 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@main
       
+      - name: Load Env
+        run: |
+          [ -f ${CONFIG_PATH}/.env ] && grep -v -e '^#' -e '^\s*$' ${CONFIG_PATH}/.env >> $GITHUB_ENV
+
       - name: Initialization environment
         env:
           DEBIAN_FRONTEND: noninteractive
