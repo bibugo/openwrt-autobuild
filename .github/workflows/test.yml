@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@main
       
-      - name: Load Env
+      - name: Load Variables
         run: |
           [ -f ${CONFIG_PATH}/.env ] && grep -v -e '^#' -e '^\s*$' ${CONFIG_PATH}/.env >> $GITHUB_ENV
 
