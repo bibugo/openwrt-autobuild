@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
-          name: openwrt_${{ env.DEVICE_NAME }}_${{ env.CONFIG_PATH }}_${{ env.FILE_DATE }}
+          name: openwrt_${{ env.CONFIG_PATH }}_${{ env.FILE_DATE }}
           path: ${{ env.FIRMWARE }}
 
       - name: Delete workflow runs
