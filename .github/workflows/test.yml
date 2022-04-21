@@ -11,11 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@main
-      
-      - name: Load Environment Variables
-        run: |
-          [ -f $WORK_PATH/.env ] && grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
-          env
+      - run: grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
 
       - name: Initialization environment
         env:
