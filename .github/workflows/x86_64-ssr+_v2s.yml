@@ -29,7 +29,7 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
-          chmod +x $CONFIG_PATH/patch_*.sh
+          chmod +x $CONFIG_PATH/patch_*.sh || :
 
       - name: Clone source code
         working-directory: /workdir
@@ -42,15 +42,16 @@ jobs:
         run: |
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default openwrt/feeds.conf.default
           cd openwrt
-          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh || :
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh
 
       - name: Load custom configuration
         run: |
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files openwrt/files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config openwrt/.config
+          cd openwrt
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh || :
 
       - name: Download package
         run: |
@@ -64,7 +65,7 @@ jobs:
         id: compile
         run: |
           cd openwrt
-          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh || :
           echo -e "$(nproc) thread compile"
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "::set-output name=status::success"
