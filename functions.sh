@@ -1,5 +1,6 @@
 #!/bin/bash
 
-load_env() {
-  grep -v -e '^#' -e '^\s*$' .env >> ${GITHUB_ENV}
+check_env() {
+  [ -z $REPO_URL ] && exit 1
+  [ -z $REPO_BRANCH ] && exit 1
 }
