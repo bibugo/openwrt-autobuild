@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 env:
-  CONFIG_PATH: X86_64-pw2
+  CONFIG_PATH: x86_64-pw2
 
 jobs:
   build:
