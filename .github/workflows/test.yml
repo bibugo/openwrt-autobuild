@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 env:
-  CONFIG_PATH: x86_64-ssr+_v2s
+  WORK_PATH: x86_64-ssr+_v2s
 
 jobs:
   build:
@@ -12,20 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@main
       
-      - name: Load Variables
+      - name: Load Environment Variables
         run: |
-          [ -f ${{env.CONFIG_PATH}}/.env ] && grep -v -e '^#' -e '^\s*$' ${{env.CONFIG_PATH}}/.env >> $GITHUB_ENV
+          echo $WORK_PATH
+          echo ${{env.WORK_PATH}}
+          [ -f ${{env.WORK_PATH}}/.env ] && grep -v -e '^#' -e '^\s*$' ${{env.WORK_PATH}}/.env >> $GITHUB_ENV
 
       - name: Initialization environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          echo $TZ
-          echo ${REPO_BRANCH}
-          echo ${{env.REPO_URL}}
-          echo $CONFIG_PATH
-          echo ${CONFIG_PATH}
-          echo ${{env.CONFIG_PATH}}
           #sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           #sudo -E apt-get -qq update
           #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
@@ -44,15 +40,15 @@ jobs:
 
       - name: Update & Install feeds
         run: |
-          [ -f ${CONFIG_PATH}/feeds.conf.default ] && mv ${CONFIG_PATH}/feeds.conf.default openwrt/feeds.conf.default
+          [ -f $WORK_PATH/feeds.conf.default ] && mv $WORK_PATH/feeds.conf.default openwrt/feeds.conf.default
           cd openwrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Load custom configuration
         run: |
-          [ -d ${CONFIG_PATH}/files ] && mv ${CONFIG_PATH}/files openwrt/files
-          [ -f ${CONFIG_PATH}/.config && mv ${CONFIG_PATH}/.config openwrt/.config
+          [ -d $WORK_PATH/files ] && mv $WORK_PATH/files openwrt/files
+          [ -f $WORK_PATH/.config ] && mv $WORK_PATH/.config openwrt/.config
 
       - name: Download package
         run: |
@@ -86,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
-          name: openwrt_${{ env.DEVICE_NAME }}_${{ env.CONFIG_PATH }}_${{ env.FILE_DATE }}
+          name: openwrt_${{ env.DEVICE_NAME }}_${{ env.WORK_PATH }}_${{ env.FILE_DATE }}
           path: ${{ env.FIRMWARE }}
 
       - name: Delete workflow runs
