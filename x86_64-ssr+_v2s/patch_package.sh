@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+
 git clone --depth=1 https://github.com/fw876/helloworld.git package/helloworld
 svn checkout "https://github.com/coolsnowwolf/packages/trunk/net/dns2socks" "package/helloworld/dns2socks"
 svn checkout "https://github.com/coolsnowwolf/packages/trunk/net/microsocks" "package/helloworld/microsocks"
