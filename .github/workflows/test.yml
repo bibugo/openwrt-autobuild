@@ -14,9 +14,8 @@ jobs:
       
       - name: Load Environment Variables
         run: |
-          echo $WORK_PATH
-          echo ${{env.WORK_PATH}}
-          [ -f ${{env.WORK_PATH}}/.env ] && grep -v -e '^#' -e '^\s*$' ${{env.WORK_PATH}}/.env >> $GITHUB_ENV
+          [ -f $WORK_PATH/.env ] && grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
+          env
 
       - name: Initialization environment
         env:
