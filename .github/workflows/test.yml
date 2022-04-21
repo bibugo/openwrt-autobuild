@@ -11,7 +11,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@main
-      - run: grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
+
+      - name: Check environment
+        run: |
+          [ -n $WORK_PATH ] && [ -d $WORK_PATH ] || exit 1
+          [ -f $WORK_PATH/.env ] && grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
 
       - name: Initialization environment
         env:
