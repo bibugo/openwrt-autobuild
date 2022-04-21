@@ -40,9 +40,9 @@ jobs:
 
       - name: Update & Install feeds
         run: |
-          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default openwrt/feeds.conf.default || :
+          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default openwrt/feeds.conf.default
           cd openwrt
-          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh || :
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
