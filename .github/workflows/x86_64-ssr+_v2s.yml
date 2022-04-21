@@ -1,9 +1,9 @@
-name: ssr plus + v2ray server (x86_64)
+name: ssr plus+v2ray server(x86_64)
 on:
   workflow_dispatch:
 
 env:
-  WORK_PATH: x86_64-ssr+_v2s
+  CONFIG_PATH: x86_64-ssr+_v2s
 
 jobs:
   build:
@@ -14,8 +14,8 @@ jobs:
 
       - name: Check environment
         run: |
-          [ -n $WORK_PATH ] && [ -d $WORK_PATH ] || exit 1
-          [ -f $WORK_PATH/.env ] && grep -v -e '^#' -e '^\s*$' $WORK_PATH/.env >> $GITHUB_ENV
+          [ -n $CONFIG_PATH ] && [ -d $CONFIG_PATH ] || exit 1
+          [ -f $CONFIG_PATH/.env ] && grep -v -e '^#' -e '^\s*$' $CONFIG_PATH/.env >> $GITHUB_ENV
 
       - name: Initialization environment
         env:
@@ -29,7 +29,7 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
-          chmod +x $WORK_PATH/patch_*.sh
+          chmod +x $CONFIG_PATH/patch_*.sh
 
       - name: Clone source code
         working-directory: /workdir
@@ -40,17 +40,17 @@ jobs:
 
       - name: Update & Install feeds
         run: |
-          [ -f $WORK_PATH/feeds.conf.default ] && mv $WORK_PATH/feeds.conf.default openwrt/feeds.conf.default
+          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default openwrt/feeds.conf.default
           cd openwrt
-          [ -f $GITHUB_WORKSPACE/$WORK_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$WORK_PATH/patch_feed.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_feed.sh
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          [ -f $GITHUB_WORKSPACE/$WORK_PATH/patch_package.sh ] && $GITHUB_WORKSPACE/$WORK_PATH/patch_package.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_package.sh
 
       - name: Load custom configuration
         run: |
-          [ -d $WORK_PATH/files ] && mv $WORK_PATH/files openwrt/files
-          [ -f $WORK_PATH/.config ] && mv $WORK_PATH/.config openwrt/.config
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files openwrt/files
+          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config openwrt/.config
 
       - name: Download package
         run: |
@@ -64,7 +64,7 @@ jobs:
         id: compile
         run: |
           cd openwrt
-          [ -f $GITHUB_WORKSPACE/$WORK_PATH/patch_compile.sh ] && $GITHUB_WORKSPACE/$WORK_PATH/patch_compile.sh
+          [ -f $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh ] && $GITHUB_WORKSPACE/$CONFIG_PATH/patch_compile.sh
           echo -e "$(nproc) thread compile"
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "::set-output name=status::success"
@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
-          name: openwrt_${{ env.DEVICE_NAME }}_${{ env.WORK_PATH }}_${{ env.FILE_DATE }}
+          name: openwrt_${{ env.DEVICE_NAME }}_${{ env.CONFIG_PATH }}_${{ env.FILE_DATE }}
           path: ${{ env.FIRMWARE }}
 
       - name: Delete workflow runs
