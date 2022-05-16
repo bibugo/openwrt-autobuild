@@ -1,4 +1,4 @@
-## target: x86_64 | packages: passwall 2
+## target: x86_64 | packages: passwall
 
 > - Target System
 >   - [x] x86
@@ -21,7 +21,7 @@
 >       - [x] Chinese Simplified (zh_Hans)
 >     - [x] luci-compat
 >   - Applications
->     - [x] luci-app-passwall2
+>     - [x] luci-app-passwall
 >     - Configuration  --->
 >       - [x] Transparent Proxy
 >       - [ ] Include Brook
@@ -30,7 +30,6 @@
 >       - [ ] Include Hysteria
 >       - [ ] Include IPv6 Nat
 >       - [ ] Include NaiveProxy
->       - [x] Include PDNSD
 >       - [x] Include Shadowsocks Libev Client
 >       - [ ] Include Shadowsocks Libev Server
 >       - [ ] Include Shadowsocks Rust Client
