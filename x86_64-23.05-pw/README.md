@@ -9,6 +9,9 @@
 > - Target Profile
 >   - [x] Generic x86/64
 > 
+> - Target Images
+>   - (128) Root filesystem partition size (in MiB)
+> 
 > - Base system
 >   - [ ] dnsmasq
 >   - [x] dnsmasq-full
