@@ -24,6 +24,8 @@
 >       - [x] Chinese Simplified (zh_Hans)
 >     - [x] luci-compat
 >   - Applications
+>     - [x] luci-app-acme
+>     - [x] luci-app-ddns
 >     - [x] luci-app-passwall
 >     - Configuration  --->
 >       - [ ] Iptables Transparent Proxy
@@ -54,6 +56,10 @@
 > - Network
 >   - File Transfer
 >     - [x] wget-ssl
+>   - IP Addresses and Names
+>     - [x] ddns-scripts
+>     - [x]   ddns-scripts-cloudflare
+>   - [x] acme-acmesh-dnsapi
 > 
 > - Utilities
 >   - Virtualization
