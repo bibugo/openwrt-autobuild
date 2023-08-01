@@ -57,6 +57,7 @@
 >   - File Transfer
 >     - [x] wget-ssl
 >   - IP Addresses and Names
+>     - [x] bind-host
 >     - [x] ddns-scripts
 >     - [x]   ddns-scripts-cloudflare
 >   - [x] acme-acmesh-dnsapi
