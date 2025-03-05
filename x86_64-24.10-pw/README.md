@@ -41,7 +41,7 @@
 >       - [x] Include Sing-Box
 >       - [ ] Include Trojan-Plus
 >       - [ ] Include tuic-client
->       - [ ] Include V2ray_Geodata
+>       - [x] Include V2ray_Geodata
 >       - [x] Include V2ray-Plugin (Shadowsocks Plugin)
 >       - [x] Include Xray
 >       - [ ] Include Xray-Plugin
