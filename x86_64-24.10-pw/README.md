@@ -26,26 +26,26 @@
 >   - Applications
 >     - [x] luci-app-passwall
 >     - Configuration  --->
->       - [ ] Iptables Transparent Proxy (NEW)
->       - [x] Nftables Transparent Proxy (NEW)
->       - [x] Include Geoview (NEW)
->       - [x] Include Haproxy (NEW)
+>       - [ ] Iptables Transparent Proxy
+>       - [x] Nftables Transparent Proxy
+>       - [x] Include Geoview
+>       - [x] Include Haproxy
 >       - [x] Include Hysteria
 >       - [x] Include NaiveProxy
->       - [x] Include Shadowsocks Libev Client (NEW)
+>       - [x] Include Shadowsocks Libev Client
 >       - [ ] Include Shadowsocks Libev Server
->       - [ ] Include Shadowsocks Rust Client (NEW)
->       - [ ] Include Shadowsocks Rust Server (NEW)
->       - [x] Include ShadowsocksR Libev Client (NEW)
->       - [ ] Include ShadowsocksR Libev Server (NEW)
->       - [x] Include Simple-Obfs (Shadowsocks Plugin) (NEW)
->       - [x] Include Sing-Box (NEW)
->       - [x] Include Trojan-Plus (NEW)
->       - [ ] Include tuic-client (NEW)
->       - [ ] Include V2ray_Geodata (NEW)
->       - [x] Include V2ray-Plugin (Shadowsocks Plugin) (NEW)
->       - [x] Include Xray (NEW)
->       [ ] Include Xray-Plugin (Shadowsocks Plugin) (NEW)
+>       - [ ] Include Shadowsocks Rust Client
+>       - [ ] Include Shadowsocks Rust Server
+>       - [x] Include ShadowsocksR Libev Client
+>       - [ ] Include ShadowsocksR Libev Server
+>       - [x] Include Simple-Obfs (Shadowsocks Plugin)
+>       - [x] Include Sing-Box
+>       - [x] Include Trojan-Plus
+>       - [ ] Include tuic-client
+>       - [ ] Include V2ray_Geodata
+>       - [x] Include V2ray-Plugin (Shadowsocks Plugin)
+>       - [x] Include Xray
+>       - [ ] Include Xray-Plugin (Shadowsocks Plugin)
 >   - Libraries
 >     - [x] luci-lib-ipkg
 > 
