@@ -10,7 +10,7 @@
 >   - [x] Generic x86/64
 > 
 > - Target Images
->   - (128) Root filesystem partition size (in MiB)
+>   - (256) Root filesystem partition size (in MiB)
 > 
 > - Base system
 >   - [ ] dnsmasq
@@ -26,27 +26,26 @@
 >   - Applications
 >     - [x] luci-app-passwall
 >     - Configuration  --->
->       - [x] Nftables Transparent Proxy
->       - [ ] Iptables Transparent Proxy
->       - [x] Include Haproxy
+>       - [ ] Iptables Transparent Proxy (NEW)
+>       - [x] Nftables Transparent Proxy (NEW)
+>       - [x] Include Geoview (NEW)
+>       - [x] Include Haproxy (NEW)
 >       - [x] Include Hysteria
 >       - [x] Include NaiveProxy
->       - [x] Include Shadowsocks Libev Client
+>       - [x] Include Shadowsocks Libev Client (NEW)
 >       - [ ] Include Shadowsocks Libev Server
->       - [ ] Include Shadowsocks Rust Client
->       - [ ] Include Shadowsocks Rust Server
->       - [x] Include ShadowsocksR Libev Client
->       - [ ] Include ShadowsocksR Libev Server
->       - [x] Include Simple-Obfs (Shadowsocks Plugin)
->       - [x] Include Sing-Box
->       - [ ] Include Trojan-Plus
->       - [ ] Include tuic-client
->       - [x] Include V2ray_Geodata
->       - [x] Include V2ray-Plugin (Shadowsocks Plugin)
->       - [x] Include Xray
->       - [ ] Include Xray-Plugin
->   - Protocols
->     - [x] luci-proto-wireguard
+>       - [ ] Include Shadowsocks Rust Client (NEW)
+>       - [ ] Include Shadowsocks Rust Server (NEW)
+>       - [x] Include ShadowsocksR Libev Client (NEW)
+>       - [ ] Include ShadowsocksR Libev Server (NEW)
+>       - [x] Include Simple-Obfs (Shadowsocks Plugin) (NEW)
+>       - [x] Include Sing-Box (NEW)
+>       - [x] Include Trojan-Plus (NEW)
+>       - [ ] Include tuic-client (NEW)
+>       - [ ] Include V2ray_Geodata (NEW)
+>       - [x] Include V2ray-Plugin (Shadowsocks Plugin) (NEW)
+>       - [x] Include Xray (NEW)
+>       [ ] Include Xray-Plugin (Shadowsocks Plugin) (NEW)
 >   - Libraries
 >     - [x] luci-lib-ipkg
 > 
