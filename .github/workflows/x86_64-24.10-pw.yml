@@ -32,14 +32,14 @@ jobs:
         run: |
           grep -v -e '^#' -e '^\s*$' ${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
-      - name: Maximize disk space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
+      # - name: Maximize disk space
+      #   uses: easimon/maximize-build-space@master
+      #   with:
+      #     remove-dotnet: true
+      #     remove-android: true
+      #     remove-haskell: true
+      #     remove-codeql: true
+      #     remove-docker-images: true
 
       - name: Setup build system
         env:
@@ -52,7 +52,11 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
+          cd /workdir
+          git clone $REPO_URL -b $REPO_BRANCH openwrt
+          ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
       - name: Check environment
         run: |
           df -hT $PWD
+          ls -al
