@@ -33,16 +33,7 @@ jobs:
           echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
           echo "DEPENDENCIES=depends-${{ github.event.inputs.runner }}" >> $GITHUB_ENV
-          grep -v -e '^#' -e '^\s*$' ${{ github.workspace }}/${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
-
-      - name: Maximize disk space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
+          grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
       - name: Setup build system
         env:
@@ -53,15 +44,23 @@ jobs:
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
-          cd /workdir
-          git clone $REPO_URL -b $REPO_BRANCH openwrt
-          ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-          df -hT $PWD
+
+      - name: Maximize disk space
+        uses: easimon/maximize-build-space@master
+        with:
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
 
       - name: Prepare Compile
         run: |
+          df -hT $PWD
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
+          ln -sf /workdir/openwrt $BUILD_ROOT
           chmod +x $CONFIG_PATH/patch_*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default $BUILD_ROOT/feeds.conf.default
           [ -f $CONFIG_PATH/patch_feed.sh ] && $CONFIG_PATH/patch_feed.sh || :
