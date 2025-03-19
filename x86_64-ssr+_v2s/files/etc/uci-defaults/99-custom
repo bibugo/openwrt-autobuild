@@ -1,6 +1,0 @@
-#!/bin/sh
-
-uci set system.@system[0].zonename=Asia/Shanghai
-uci commit system
-
-exit 0
