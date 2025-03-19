@@ -23,6 +23,11 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout
+        with:
+          ref: nightly
+
       - name: Initialization environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -43,3 +48,7 @@ jobs:
           remove-haskell: true
           remove-codeql: true
           remove-docker-images: true
+
+      - name: Prepare
+        run: |
+          df -hT $PWD
