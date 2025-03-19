@@ -33,7 +33,7 @@ jobs:
           echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
           echo "DEPENDENCIES=depends-${{ github.event.inputs.runner }}" >> $GITHUB_ENV
-          grep -v -e '^#' -e '^\s*$' $CONFIG_PATH/.env >> $GITHUB_ENV
+          grep -v -e '^#' -e '^\s*$' ${{ github.workspace }}/${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
       - name: Maximize disk space
         uses: easimon/maximize-build-space@master
