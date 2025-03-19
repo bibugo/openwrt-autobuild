@@ -1,15 +1,17 @@
 name: Build OpenWrt
+
 on:
   workflow_dispatch:
     inputs:
       configuration:
-        description: 'Choose a configuration'
+        description: 'Configuration'
         required: true
         default: ''
         type: choice
         options:
           - x86_64-24.10-pw
       runner:
+        description: 'Runner'
         required: true
         default: 'ubuntu-20.04'
         type: choice
