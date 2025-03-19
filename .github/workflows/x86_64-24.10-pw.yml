@@ -25,8 +25,11 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
 
     steps:
-      - uses: actions/checkout
-      - run: |
+      - name: Checkout
+        uses: actions/checkout
+
+      - name: Prepare environment
+        run: |
         grep -v -e '^#' -e '^\s*$' .env >> $GITHUB_ENV
 
       - name: Initialization environment
