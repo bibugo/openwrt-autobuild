@@ -25,6 +25,15 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
 
     steps:
+      - name: Maximize disk space
+        uses: easimon/maximize-build-space@master
+        with:
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+
       - name: Checkout
         uses: actions/checkout@main
 
@@ -45,15 +54,6 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
 
-      - name: Maximize disk space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
       - name: Prepare Compile
         run: |
           df -hT $PWD
@@ -61,14 +61,15 @@ jobs:
           sudo chown $USER:$GROUPS /workdir
           git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
           ln -sf /workdir/openwrt $BUILD_ROOT
+          cd $BUILD_ROOT
           chmod +x $CONFIG_PATH/patch_*.sh || :
-          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default $BUILD_ROOT/feeds.conf.default
+          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
           [ -f $CONFIG_PATH/patch_feed.sh ] && $CONFIG_PATH/patch_feed.sh || :
-          $BUILD_ROOT/scripts/feeds update -a
-          $BUILD_ROOT/scripts/feeds install -a
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
           [ -f $CONFIG_PATH/patch_package.sh ] && $CONFIG_PATH/patch_package.sh || :
-          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files $BUILD_ROOT/files
-          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config $BUILD_ROOT/.config
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
+          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
 
       - name: Download package
         run: |
