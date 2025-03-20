@@ -57,13 +57,17 @@ jobs:
           echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
-      - name: Prepare compile
+      - name: Clone source
         run: |
           df -hT $PWD
           sudo mkdir -p /workdir
           sudo chown $USER:$GROUPS /workdir
           git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
           ln -sf /workdir/openwrt $BUILD_ROOT
+
+      - name: Compile package
+        id: compile
+        run: |
           cd $BUILD_ROOT
           chmod +x $CONFIG_PATH/patch_*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
@@ -73,18 +77,8 @@ jobs:
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
           [ -f $CONFIG_PATH/patch_after_feed.sh ] && $CONFIG_PATH/patch_after_feed.sh || :
-
-      - name: Compile package
-        id: compile
-        run: |
-          cd $BUILD_ROOT
-          make defconfig
-          make download -j8
-          find dl -size -1024c -exec ls -l {} \;
-          find dl -size -1024c -exec rm -f {} \;
-          [ -f $CONFIG_PATH/patch_before_compile.sh ] && $CONFIG_PATH/patch_before_compile.sh || :
-          echo -e "$(nproc) thread compile"
-          make -j$(nproc) || make -j1 || make -j1 V=s
+          echo "$(($(nproc)+1)) thread compile"
+          IGNORE_ERRORS=m make -j$(($(nproc)+1)) defconfig download clean world || IGNORE_ERRORS=m make -j1 defconfig download clean world V=s
           cd bin/targets/*/*
           rm -rf packages
           { echo '### SHA256SUMS'; echo '```txt'; cat sha256sums; echo '```'; } > $BUILD_ROOT/SHA256SUMS
