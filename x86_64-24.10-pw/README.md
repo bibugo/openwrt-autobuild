@@ -2,20 +2,22 @@
 
 > - Target System
 >   - [x] x86
-> 
+>
 > - Subtarget
 >   - [x] x86_64
-> 
+>
 > - Target Profile
 >   - [x] Generic x86/64
-> 
+>
 > - Target Images
+>   - [ ] ext4
+>   - [ ] Build GRUB EFI images
 >   - (256) Root filesystem partition size (in MiB)
-> 
+>
 > - Base system
 >   - [ ] dnsmasq
 >   - [x] dnsmasq-full
-> 
+>
 > - LuCI
 >   - Collections
 >     - [x] luci
@@ -48,11 +50,11 @@
 >       - [ ] Include Xray-Plugin (Shadowsocks Plugin)
 >   - Libraries
 >     - [x] luci-lib-ipkg
-> 
+>
 > - Network
 >   - File Transfer
 >     - [x] wget-ssl
-> 
+>
 > - Utilities
 >   - Virtualization
 >     - [x] qemu-ga
