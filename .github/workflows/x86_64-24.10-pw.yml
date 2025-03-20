@@ -28,25 +28,6 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
 
     steps:
-      - name: Setup build system
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo -E apt-get -qq update
-          sudo -E apt-get -qq install $(cat depends-${{ github.event.inputs.runner }} | xargs)
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean
-          sudo timedatectl set-timezone "$TZ"
-
-      - name: Maximize disk space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
       - name: Checkout
         uses: actions/checkout@main
 
@@ -57,7 +38,19 @@ jobs:
           echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
           grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
-      - name: Download sources
+      - name: Setup system
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install $(cat depends-${{ github.event.inputs.runner }} | xargs)
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+
+      - name: Clone source
         run: |
           df -hT $PWD
           sudo mkdir -p /workdir
@@ -65,7 +58,7 @@ jobs:
           git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
           ln -sf /workdir/openwrt $BUILD_ROOT
 
-      - name: Compile packages
+      - name: Compile
         id: compile
         run: |
           cd $BUILD_ROOT
