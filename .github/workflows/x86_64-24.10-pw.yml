@@ -13,7 +13,7 @@ on:
       runner:
         description: 'Runner'
         required: true
-        default: 'ubuntu-22.04'
+        default: 'ubuntu-20.04'
         type: choice
         options:
           - ubuntu-20.04
@@ -52,12 +52,12 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "BUILD_NAME=${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
-          echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
+          echo "CONFIG_NAME=${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
           grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
-      - name: Clone source
+      - name: Download sources
         run: |
           df -hT $PWD
           sudo mkdir -p /workdir
@@ -65,7 +65,7 @@ jobs:
           git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
           ln -sf /workdir/openwrt $BUILD_ROOT
 
-      - name: Compile package
+      - name: Compile packages
         id: compile
         run: |
           cd $BUILD_ROOT
@@ -77,8 +77,12 @@ jobs:
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
           [ -f $CONFIG_PATH/patch_after_feed.sh ] && $CONFIG_PATH/patch_after_feed.sh || :
-          echo "$(($(nproc)+1)) thread compile"
-          IGNORE_ERRORS=m make -j$(($(nproc)+1)) defconfig download clean world || IGNORE_ERRORS=m make -j1 defconfig download clean world V=s
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          echo -e "$(nproc) thread compile"
+          make -j$(nproc) || make -j1 || make -j1 V=s
           cd bin/targets/*/*
           rm -rf packages
           { echo '### SHA256SUMS'; echo '```txt'; cat sha256sums; echo '```'; } > $BUILD_ROOT/SHA256SUMS
@@ -90,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.compile.outputs.status == 'success'
         with:
-          name: openwrt_$BUILD_NAME_$BUILD_DATE
+          name: openwrt_$CONFIG_NAME_$BUILD_DATE
           path: $FIRMWARE
 
       - name: Delete workflow runs
