@@ -67,12 +67,12 @@ jobs:
           cd $BUILD_ROOT
           chmod +x $CONFIG_PATH/patch_*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
-          [ -f $CONFIG_PATH/patch_feed.sh ] && $CONFIG_PATH/patch_feed.sh || :
+          [ -f $CONFIG_PATH/patch_before_feed.sh ] && $CONFIG_PATH/patch_before_feed.sh || :
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          [ -f $CONFIG_PATH/patch_package.sh ] && $CONFIG_PATH/patch_package.sh || :
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
+          [ -f $CONFIG_PATH/patch_after_feed.sh ] && $CONFIG_PATH/patch_after_feed.sh || :
 
       - name: Compile package
         id: compile
@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload firmware
         uses: actions/upload-artifact@main
-        if: steps.compile.outputs.status == 'success' && !cancelled()
+        if: steps.compile.outputs.status == 'success'
         with:
           name: openwrt_$BUILD_NAME_$BUILD_DATE
           path: $FIRMWARE
@@ -102,5 +102,5 @@ jobs:
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
         with:
-          retain_days: 1
+          retain_days: 0
           keep_minimum_runs: 3
