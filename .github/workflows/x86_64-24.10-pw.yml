@@ -13,7 +13,7 @@ on:
       runner:
         description: 'Runner'
         required: true
-        default: 'ubuntu-20.04'
+        default: 'ubuntu-22.04'
         type: choice
         options:
           - ubuntu-20.04
@@ -52,11 +52,12 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "BUILD_NAME=${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
+          echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
 
-      - name: Prepare Compile
+      - name: Prepare compile
         run: |
           df -hT $PWD
           sudo mkdir -p /workdir
@@ -73,8 +74,33 @@ jobs:
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
 
-      - name: Download package
+      - name: Compile package
+        id: compile
         run: |
-          cd openwrt
-          ls -al
-          cat feeds.conf.default
+          cd $BUILD_ROOT
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          [ -f $CONFIG_PATH/patch_before_compile.sh ] && $CONFIG_PATH/patch_before_compile.sh || :
+          echo -e "$(nproc) thread compile"
+          make -j$(nproc) || make -j1 || make -j1 V=s
+          cd bin/targets/*/*
+          rm -rf packages
+          { echo '### SHA256SUMS'; echo '```txt'; cat sha256sums; echo '```'; } > $BUILD_ROOT/SHA256SUMS
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@main
+        if: steps.compile.outputs.status == 'success' && !cancelled()
+        with:
+          name: openwrt_$BUILD_NAME_$BUILD_DATE
+          path: $FIRMWARE
+
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 3
