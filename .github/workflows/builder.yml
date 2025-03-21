@@ -1,0 +1,96 @@
+name: Build OpenWrt v1.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Configuration'
+        required: true
+        default: ''
+        type: choice
+        options:
+          - x86_64-24.10-pw
+      runner:
+        description: 'Runner'
+        required: true
+        default: 'ubuntu-20.04'
+        type: choice
+        options:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+
+jobs:
+  build:
+    runs-on: ${{ github.event.inputs.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Prepare environment
+        run: |
+          echo "CONFIG_NAME=${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "DEPENDENCIES=depends-${{ github.event.inputs.runner }}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
+          grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
+
+      - name: Setup system
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install $(cat $DEPENDENCIES | xargs)
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "${TZ:-Asia/Shanghai}"
+
+      - name: Clone source
+        run: |
+          df -hT $PWD
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          git clone $REPO_URL -b $REPO_BRANCH /workdir/openwrt
+          ln -sf /workdir/openwrt $BUILD_ROOT
+
+      - name: Compile
+        id: compile
+        run: |
+          cd $BUILD_ROOT
+          [ -d $CONFIG_PATH/patchs ] && chmod +x $CONFIG_PATH/patchs/*.sh || :
+          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
+          [ -f $CONFIG_PATH/patchs/before_feeds.sh ] && $CONFIG_PATH/patchs/before_feeds.sh || :
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
+          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
+          [ -f $CONFIG_PATH/patchs/after_feeds.sh ] && $CONFIG_PATH/patchs/after_feeds.sh || :
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+          [ -f $CONFIG_PATH/patchs/before_compile.sh ] && $CONFIG_PATH/patchs/before_compile.sh || :
+          echo -e "$(nproc) thread compile"
+          make -j$(nproc) || make -j1 || make -j1 V=s
+          [ -f $CONFIG_PATH/patchs/after_compile.sh ] && $CONFIG_PATH/patchs/after_compile.sh || :
+          cd bin/targets/*/*
+          rm -rf packages
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@main
+        if: steps.compile.outputs.status == 'success'
+        with:
+          name: openwrt-${{ env.CONFIG_NAME }}-${{ env.BUILD_DATE }}
+          path: ${{ env.FIRMWARE }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 0
+          keep_minimum_runs: 2
