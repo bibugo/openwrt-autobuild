@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sed -i '/passwall/d' /etc/opkg/distfeeds.conf
+
 uci set system.@system[0].zonename=Asia/Shanghai
 uci commit system
 
