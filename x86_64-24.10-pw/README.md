@@ -1,4 +1,4 @@
-## target: x86_64 | packages: passwall
+## target: x86_64 | packages: passwall 25.4.20
 
 > - Target System
 >   - [x] x86
