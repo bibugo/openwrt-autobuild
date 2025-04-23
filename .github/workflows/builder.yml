@@ -1,8 +1,12 @@
 name: Build OpenWrt v1.0
+run-name: Build OpenWrt ${{ inputs.run_desc }}
 
 on:
   workflow_dispatch:
     inputs:
+      run_desc:
+        description: 'Description'
+        type: string
       configuration:
         description: 'Configuration'
         required: true
