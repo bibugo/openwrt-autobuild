@@ -1,5 +1,5 @@
 name: OpenWrt Builder v1.0
-run-name: "Build ${{ inputs.build }}"
+run-name: "build ${{ inputs.build }}"
 
 on:
   workflow_dispatch:
