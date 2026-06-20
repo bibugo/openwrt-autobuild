@@ -1,11 +1,11 @@
-name: Build OpenWrt v1.0
-run-name: 'Build OpenWrt: ${{ inputs.run_desc }}'
+name: OpenWrt Builder v1.0
+run-name: "Build ${{ inputs.build }}"
 
 on:
   workflow_dispatch:
     inputs:
-      run_desc:
-        description: 'Description'
+      build:
+        description: "Build"
         type: string
       configuration:
         description: 'Configuration'
