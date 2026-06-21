@@ -1,6 +1,6 @@
 # openwrt-autobuild
 
-./scripts/diffconfig.sh > custom_config
+./scripts/diffconfig.sh > diffconfig
 
 **References:**
 - [[OpenWrt Wiki] Build system setup](https://openwrt.org/docs/guide-developer/toolchain/install-buildsystem#debianubuntumint)
