@@ -101,10 +101,8 @@ jobs:
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
           [ -f $CONFIG_PATH/patchs/after_feeds.sh ] && $CONFIG_PATH/patchs/after_feeds.sh || :
-          
-          if ! grep -q "CONFIG_CCACHE=y" .config; then
-            echo "CONFIG_CCACHE=y" >> .config
-          fi
+
+          grep -q "CONFIG_CCACHE=" .config && sed -i 's/CONFIG_CCACHE=.*/CONFIG_CCACHE=y/' .config || sed -i '$a CONFIG_CCACHE=y' .config
           
           make defconfig
           make download -j8
@@ -119,6 +117,8 @@ jobs:
           
           cd bin/targets/*/*
           rm -rf packages
+          sed -i -E "/[[:space:]]([^/]*\.buildinfo|profiles\.json)$/d" sha256sums
+          rm -f *.buildinfo profiles.json
           
           BUILD_DATE=$(date +"%Y%m%d%H%M")
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
@@ -129,7 +129,7 @@ jobs:
           echo "* **编译时间**：$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_WORKSPACE/release_body.md
           echo "* **配置方案**：${{ env.CONFIG_NAME }}" >> $GITHUB_WORKSPACE/release_body.md
           echo "* **文件列表**：" >> $GITHUB_WORKSPACE/release_body.md
-          ls -lh | awk '{print "  * ["$9 "](大小: "$5")"}' >> $GITHUB_WORKSPACE/release_body.md
+          ls -lh | awk '{print "  * ["$9 "] ("$5")"}' >> $GITHUB_WORKSPACE/release_body.md
 
       - name: Publish to GitHub Releases
         uses: ncipollo/release-action@v1

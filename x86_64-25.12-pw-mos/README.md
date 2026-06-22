@@ -26,28 +26,9 @@
 >       - [x] Chinese Simplified (zh_Hans)
 >     - [x] luci-compat
 >   - Applications
+>     - [x] luci-app-mosdns
 >     - [x] luci-app-passwall
->     - Configuration  --->
->       - [ ] Iptables Transparent Proxy
->       - [x] Nftables Transparent Proxy
->       - [x] Include Geoview
->       - [x] Include Haproxy
->       - [x] Include Hysteria
->       - [x] Include NaiveProxy
->       - [x] Include Shadowsocks Libev Client
->       - [ ] Include Shadowsocks Libev Server
->       - [ ] Include Shadowsocks Rust Client
->       - [ ] Include Shadowsocks Rust Server
->       - [x] Include ShadowsocksR Libev Client
->       - [ ] Include ShadowsocksR Libev Server
->       - [x] Include Simple-Obfs (Shadowsocks Plugin)
->       - [x] Include Sing-Box
->       - [x] Include Trojan-Plus
->       - [ ] Include tuic-client
->       - [ ] Include V2ray_Geodata
->       - [x] Include V2ray-Plugin (Shadowsocks Plugin)
->       - [x] Include Xray
->       - [ ] Include Xray-Plugin (Shadowsocks Plugin)
+>       - Configuration  --->
 >   - Libraries
 >     - [x] luci-lib-ipkg
 >
