@@ -1,4 +1,4 @@
-name: OpenWrt Builder v2.6.1
+name: OpenWrt Builder v2.6.2
 run-name: "build ${{ inputs.build }}"
 
 on:
@@ -124,7 +124,7 @@ jobs:
           
           TARGET_DIR=$(ls -d "$BUILD_ROOT"/bin/targets/*/* 2>/dev/null | head -n 1); [ -z "$TARGET_DIR" ] && exit 1 || cd "$TARGET_DIR"
           rm -rf packages
-          [ -f sha256sums ] && sed -i -E "/[[:space:]]([^/]*\.buildinfo|profiles\.json)$/d" sha256sums
+          [ -f sha256sums ] && sed -i -E "/[[:space:]]\*?([^/]*\.buildinfo|profiles\.json)$/d" sha256sums
           rm -f *.buildinfo profiles.json
           
           BUILD_DATE=$(date +"%Y%m%d%H%M")
