@@ -1,4 +1,4 @@
-## target: x86_64 | packages: passwall
+## target: x86_64 | packages: passwall mosdns
 
 > - Target System
 >   - [x] x86
@@ -10,9 +10,11 @@
 >   - [x] Generic x86/64
 >
 > - Target Images
->   - [ ] ext4
 >   - [ ] Build GRUB EFI images
 >   - (256) Root filesystem partition size (in MiB)
+>
+> - Advanced configuration options (for developers)
+>   - [x] Use ccache
 >
 > - Base system
 >   - [ ] dnsmasq

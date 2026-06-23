@@ -1,4 +1,4 @@
-name: OpenWrt Builder v2.5
+name: OpenWrt Builder v2.6
 run-name: "build ${{ inputs.build }}"
 
 on:
@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prepare Environment Variables
         run: |
@@ -43,13 +43,21 @@ jobs:
           echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
           echo "DEPENDENCIES=depends-${{ github.event.inputs.runner }}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
+          
+          echo "REPO_URL=https://github.com/openwrt/openwrt.git" >> $GITHUB_ENV
+          echo "REPO_BRANCH=main" >> $GITHUB_ENV
+          echo "TZ=Asia/Shanghai" >> $GITHUB_ENV
+          
           if [ -f "./${{ github.event.inputs.configuration }}/.env" ]; then
+            echo "" >> $GITHUB_ENV
             grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
+            echo "" >> $GITHUB_ENV
           fi
+          
           echo "CONFIG_HASH=${{ hashFiles(format('{0}/.config', github.event.inputs.configuration), format('{0}/.env', github.event.inputs.configuration)) }}" >> $GITHUB_ENV
 
       - name: Maximize Disk Space
-        uses: jlumbroso/free-disk-space@main
+        uses: insightsengineering/disk-space-reclaimer@v1
         with:
           tool-cache: true
           android: true
@@ -57,7 +65,7 @@ jobs:
           haskell: true
           large-packages: true
           docker-images: true
-          swap: false
+          swap-storage: false
 
       - name: Install System Dependencies
         env:
@@ -71,14 +79,13 @@ jobs:
           fi
           sudo apt-get -qq autoremove --purge
           sudo apt-get -qq clean
-          sudo timedatectl set-timezone "${TZ:-Asia/Shanghai}"
 
       - name: Clone Source Code
         run: |
           git clone --depth=1 -b $REPO_BRANCH $REPO_URL $BUILD_ROOT
 
       - name: Cache ccache & dl
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ env.BUILD_ROOT }}/dl
@@ -90,34 +97,30 @@ jobs:
       - name: Compile Firmware
         id: compile
         run: |
-          if [ -f "$CONFIG_PATH/.config" ]; then
-            grep -q "CONFIG_CCACHE=" "$CONFIG_PATH/.config" && sed -i 's/CONFIG_CCACHE=.*/CONFIG_CCACHE=y/' "$CONFIG_PATH/.config" || sed -i '$a CONFIG_CCACHE=y' "$CONFIG_PATH/.config"
-          fi
-          
           cd $BUILD_ROOT
           mkdir -p .ccache
           
-          [ -d $CONFIG_PATH/patchs ] && chmod +x $CONFIG_PATH/patchs/*.sh || :
+          [ -d $CONFIG_PATH/patches ] && chmod +x $CONFIG_PATH/patches/*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
-          [ -f $CONFIG_PATH/patchs/before_feeds.sh ] && $CONFIG_PATH/patchs/before_feeds.sh || :
+          [ -f $CONFIG_PATH/patches/before_feeds.sh ] && $CONFIG_PATH/patches/before_feeds.sh || :
           
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
           [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
           [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
-          [ -f $CONFIG_PATH/patchs/after_feeds.sh ] && $CONFIG_PATH/patchs/after_feeds.sh || :
+          [ -f $CONFIG_PATH/patches/after_feeds.sh ] && $CONFIG_PATH/patches/after_feeds.sh || :
           
           make defconfig
           make download -j8
           find dl -maxdepth 1 -size -512c -exec rm -f {} \;
           
-          [ -f $CONFIG_PATH/patchs/before_compile.sh ] && $CONFIG_PATH/patchs/before_compile.sh || :
+          [ -f $CONFIG_PATH/patches/before_compile.sh ] && $CONFIG_PATH/patches/before_compile.sh || :
           
           echo "$(nproc) threads compilation started"
           make -j$(nproc) || make -j1 V=s || exit 1
           
-          [ -f $CONFIG_PATH/patchs/after_compile.sh ] && $CONFIG_PATH/patchs/after_compile.sh || :
+          [ -f $CONFIG_PATH/patches/after_compile.sh ] && $CONFIG_PATH/patches/after_compile.sh || :
           
           TARGET_DIR=$(ls -d "$BUILD_ROOT"/bin/targets/*/* 2>/dev/null | head -n 1); [ -z "$TARGET_DIR" ] && exit 1 || cd "$TARGET_DIR"
           rm -rf packages
@@ -133,7 +136,7 @@ jobs:
           echo "* **编译时间**：$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_WORKSPACE/release_body.md
           echo "* **配置方案**：${{ env.CONFIG_NAME }}" >> $GITHUB_WORKSPACE/release_body.md
           echo "* **文件列表**：" >> $GITHUB_WORKSPACE/release_body.md
-          ls -lh | awk '!/(^total|sha256sums)/ {print "  * ["$9"] ("$5")"}' >> $GITHUB_WORKSPACE/release_body.md
+          ls -lh | awk '!/(^total|sha256sums)/ {print "  * ["$NF"] ("$5")"}' >> $GITHUB_WORKSPACE/release_body.md
 
       - name: Publish to GitHub Releases
         uses: ncipollo/release-action@v1
