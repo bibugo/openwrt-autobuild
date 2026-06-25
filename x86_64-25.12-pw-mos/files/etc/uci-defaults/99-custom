@@ -3,4 +3,6 @@
 uci set system.@system[0].zonename=Asia/Shanghai
 uci commit system
 
+sed -i -e '/mosdns/d' -e '/passwall/d' /etc/apk/repositories.d/distfeeds.list 2>/dev/null || true
+
 exit 0
