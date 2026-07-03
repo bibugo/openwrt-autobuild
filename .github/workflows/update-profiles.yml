@@ -1,0 +1,113 @@
+# .github/workflows/update-profiles.yml
+name: Auto Update Workflow Profiles
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/workflows/**' # 忽略工作流自身的改动，防止死循环
+
+jobs:
+  update-yaml:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      TARGET_FILE: '.github/workflows/builder-v2.yml'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完整拉取历史，确保能准确获取 Git 提交时间
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install PyYAML Processor
+        run: pip install ruamel.yaml
+
+      - name: Run Dynamic Directory Scanner
+        run: |
+          python - << 'EOF'
+          import os
+          import subprocess
+          from ruamel.yaml import YAML
+
+          # 1. 扫描当前目录下，所有不以 '.' 开头的合法子目录
+          subdirectories = []
+          for item in os.listdir('.'):
+              if os.path.isdir(item) and not item.startswith('.'):
+                  subdirectories.append(item)
+
+          if not subdirectories:
+              print("警告: 未在根目录下找到任何非隐藏子目录。")
+              exit(0)
+
+          # 2. 通过 Git 历史获取目录真实的最后修改时间戳
+          def get_git_mtime(dir_name):
+              try:
+                  result = subprocess.run(
+                      ['git', 'log', '-1', '--format=%ct', dir_name],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      text=True,
+                      check=True
+                  )
+                  return int(result.stdout.strip() or 0)
+              except Exception:
+                  return 0
+
+          # 依据真正的 Git 提交时间进行降序排序
+          subdirectories.sort(key=get_git_mtime, reverse=True)
+          latest_dir = subdirectories[0]
+
+          print(f"扫描到的目录列表: {subdirectories}")
+          print(f"最新修改的目录（设为默认值）: {latest_dir}")
+
+          # 3. 初始化 ruamel.yaml
+          yaml = YAML()
+          yaml.preserve_quotes = True
+          yaml.indent(mapping=2, sequence=4, offset=2)
+
+          target_file = os.environ.get('TARGET_FILE')
+          if not target_file:
+              print("错误: 环境变量 TARGET_FILE 未定义")
+              exit(1)
+          
+          with open(target_file, 'r', encoding='utf-8') as f:
+              data = yaml.load(f)
+
+          try:
+              # 4. 定位并更新目标节点
+              input_node = data['on']['workflow_dispatch']['inputs']['configuration']
+              input_node['options'] = subdirectories
+              input_node['default'] = latest_dir
+              print(f"成功更新了 {target_file} 的 options 和 default 节点！")
+          except KeyError as e:
+              print(f"错误: 无法在 YAML 中找到对应的节点路径，缺少的键名为: {e}")
+              exit(1)
+
+          # 5. 安全写回文件
+          with open(target_file, 'w', encoding='utf-8') as f:
+              yaml.dump(data, f)
+          
+          print("YAML 配置文件已智能同步。")
+          EOF
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet "$TARGET_FILE"; then
+            echo "没有检测到任何子目录或默认值的变化，跳过提交。"
+          else
+            git add "$TARGET_FILE"
+            git commit -m "chore: update Workflow Profiles [skip ci]"
+            git push
+          fi

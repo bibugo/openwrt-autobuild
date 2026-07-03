@@ -21,7 +21,7 @@
 >     - [x] Compile the kernel with BPF event support
 >     - [x] XDP sockets support
 >
-> - Advanced configuration options (for developers)
+> - [x] Advanced configuration options (for developers)
 >   - [x] Use ccache
 >
 > - Base system
