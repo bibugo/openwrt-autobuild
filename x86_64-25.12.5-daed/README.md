@@ -14,11 +14,14 @@
 >
 > - Global build settings
 >   - Kernel build options
+>     - [x] Compile the kernel with symbol table information
 >     - [ ]   Reduce debugging information
 >     - [x] Compile the kernel with debug information
 >     - [x]   Enable additional BTF type information
+>     - [x]     Allow loading modules with non-matching BTF type info
 >     - [x] Compile the kernel with kprobes support
 >     - [x] Compile the kernel with BPF event support
+>     - [x] Support BTF function arguments for probe events
 >     - [x] XDP sockets support
 >
 > - [x] Advanced configuration options (for developers)
