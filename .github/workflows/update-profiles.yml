@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      workflows: write
 
     env:
       TARGET_FILE: '.github/workflows/builder-v2.yml'
