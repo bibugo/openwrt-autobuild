@@ -23,6 +23,9 @@
 >
 > - [x] Advanced configuration options (for developers)
 >   - [x] Use ccache
+>   - BPF toolchain (Build LLVM toolchain for eBPF)
+>     - [x] Use host LLVM toolchain
+>   - (/usr) Host LLVM toolchain path (prefix)
 >
 > - Base system
 >   - [ ] dnsmasq
