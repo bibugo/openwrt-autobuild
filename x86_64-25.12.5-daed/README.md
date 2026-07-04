@@ -56,6 +56,9 @@
 > - Network
 >   - File Transfer
 >     - [x] wget-ssl
+>   - Web Servers/Proxies
+>     - [x] dae
+>     - [x] daed
 >
 > - Utilities
 >   - Virtualization
