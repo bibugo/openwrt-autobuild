@@ -1,5 +1,7 @@
 ## target: x86_64 | packages: daed
 
+Manual Add: CONFIG_KERNEL_NETKIT=y
+
 > - Target System
 >   - [x] x86
 >
@@ -55,7 +57,10 @@
 >
 > - Network
 >   - File Transfer
+>     - [x] curl
 >     - [x] wget-ssl
+>   - Routing and Redirection
+>     - [x] ip-full
 >   - Web Servers/Proxies
 >     - [x] dae
 >     - [x] daed
