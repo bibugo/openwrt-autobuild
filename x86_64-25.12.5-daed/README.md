@@ -14,21 +14,21 @@
 >
 > - Global build settings
 >   - Kernel build options
->     - [x] Compile the kernel with symbol table information
->     - [ ]   Reduce debugging information
->     - [x] Compile the kernel with debug information
->     - [x]   Enable additional BTF type information
->     - [x]     Allow loading modules with non-matching BTF type info
->     - [x] Compile the kernel with kprobes support
->     - [x] Compile the kernel with BPF event support
->     - [x] Support BTF function arguments for probe events
->     - [x] XDP sockets support
+>     - [x] Compile the kernel with symbol table information  [CONFIG_KERNEL_KALLSYMS=y]
+>     - [ ]   Reduce debugging information  [CONFIG_KERNEL_DEBUG_INFO_REDUCED is not set]
+>     - [x] Compile the kernel with debug information  [CONFIG_KERNEL_DEBUG_INFO=y]
+>     - [x]   Enable additional BTF type information  [CONFIG_KERNEL_DEBUG_INFO_BTF=y]
+>     - [x]     Allow loading modules with non-matching BTF type info  [CONFIG_KERNEL_MODULE_ALLOW_BTF_MISMATCH=y]
+>     - [x] Compile the kernel with kprobes support  [CONFIG_KERNEL_KPROBES=y]
+>     - [x] Compile the kernel with BPF event support  [CONFIG_KERNEL_BPF_EVENTS=y]
+>     - [x] Support BTF function arguments for probe events  [CONFIG_KERNEL_PROBE_EVENTS_BTF_ARGS=y]
+>     - [x] XDP sockets support  [CONFIG_KERNEL_XDP_SOCKETS=y]
 >
-> - [x] Advanced configuration options (for developers)
+> - [x] Advanced configuration options (for developers)  [CONFIG_DEVEL=y]
 >   - [x] Use ccache
->   - BPF toolchain (Build LLVM toolchain for eBPF)
->     - [x] Use host LLVM toolchain
->   - (/usr) Host LLVM toolchain path (prefix)
+>   - BPF toolchain (Build LLVM toolchain for eBPF)  [CONFIG_TOOLCHAINOPTS=y]
+>     - [x] Use host LLVM toolchain  [CONFIG_BPF_TOOLCHAIN_HOST=y CONFIG_USE_LLVM_HOST=y]
+>   - (/usr) Host LLVM toolchain path (prefix)  [CONFIG_BPF_TOOLCHAIN_HOST_PATH="/usr"]
 >
 > - Base system
 >   - [ ] dnsmasq
