@@ -1,0 +1,175 @@
+name: OpenWrt Builder v3.0.0
+run-name: "build ${{ inputs.build }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Build Tag/Version"
+        type: string
+        required: false
+      configuration:
+        description: 'Configuration Folder'
+        required: true
+        default: 'x86_64-25.12.5-daed'
+        type: choice
+        options:
+          - x86_64-25.12.5-daed
+          - x86_64-25.12-pw-mos
+          - x86_64-24.10-pw
+      runner:
+        description: 'Runner OS'
+        required: true
+        default: 'ubuntu-26.04'
+        type: choice
+        options:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-26.04
+      debug:
+        description: 'SSH Debug (true/false)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build:
+    runs-on: ${{ github.event.inputs.runner }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Prepare Environment Variables
+        run: |
+          echo "CONFIG_NAME=${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "CONFIG_PATH=${{ github.workspace }}/${{ github.event.inputs.configuration }}" >> $GITHUB_ENV
+          echo "DEPENDENCIES=depends-${{ github.event.inputs.runner }}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${{ github.workspace }}/openwrt" >> $GITHUB_ENV
+          
+          echo "REPO_URL=https://github.com/openwrt/openwrt.git" >> $GITHUB_ENV
+          echo "REPO_BRANCH=main" >> $GITHUB_ENV
+          echo "TZ=Asia/Shanghai" >> $GITHUB_ENV
+          
+          if [ -f "./${{ github.event.inputs.configuration }}/.env" ]; then
+            echo "" >> $GITHUB_ENV
+            grep -v -e '^#' -e '^\s*$' ./${{ github.event.inputs.configuration }}/.env >> $GITHUB_ENV
+            echo "" >> $GITHUB_ENV
+          fi
+          
+          echo "CONFIG_HASH=${{ hashFiles(format('{0}/.config', github.event.inputs.configuration), format('{0}/.env', github.event.inputs.configuration)) }}" >> $GITHUB_ENV
+
+      - name: Maximize Disk Space
+        uses: insightsengineering/disk-space-reclaimer@v1
+        with:
+          tools-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
+      - name: Install System Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get -qq update
+          if [ -f "$DEPENDENCIES" ]; then
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y $(cat $DEPENDENCIES | xargs)
+          else
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y bzip2 g++ gawk gcc git glibc-source libncurses-dev make
+          fi
+          sudo apt-get -qq autoremove --purge
+          sudo apt-get -qq clean
+
+      - name: Clone Source Code
+        run: |
+          git clone --depth=1 -b $REPO_BRANCH $REPO_URL $BUILD_ROOT
+
+      - name: Cache ccache & dl
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.BUILD_ROOT }}/dl
+            ${{ env.BUILD_ROOT }}/.ccache
+          key: ${{ runner.os }}-openwrt-${{ env.CONFIG_NAME }}-${{ env.CONFIG_HASH }}-${{ hashFiles('**/feeds.conf.default') }}
+          restore-keys: |
+            ${{ runner.os }}-openwrt-${{ env.CONFIG_NAME }}-
+
+      - name: Prepare for Compile
+        run: |
+          cd $BUILD_ROOT
+          mkdir -p .ccache
+          
+          [ -d $CONFIG_PATH/patches ] && chmod +x $CONFIG_PATH/patches/*.sh || :
+          [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
+          [ -f $CONFIG_PATH/patches/before_feeds.sh ] && $CONFIG_PATH/patches/before_feeds.sh || :
+          
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
+          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
+          [ -f $CONFIG_PATH/patches/after_feeds.sh ] && $CONFIG_PATH/patches/after_feeds.sh || :
+          
+          make defconfig
+
+      - name: SSH connection (tmate)
+        uses: mxschmitt/action-tmate@v3
+        if: github.event.inputs.debug == 'true'
+        timeout-minutes: 30
+
+      - name: Compile Firmware
+        id: compile
+        run: |
+          cd $BUILD_ROOT
+
+          make download -j8
+          find dl -maxdepth 1 -size -512c -exec rm -f {} \;
+          
+          [ -f $CONFIG_PATH/patches/before_compile.sh ] && $CONFIG_PATH/patches/before_compile.sh || :
+          
+          echo "$(nproc) threads compilation started"
+          make -j$(nproc) || make -j1 V=s || exit 1
+          
+          [ -f $CONFIG_PATH/patches/after_compile.sh ] && $CONFIG_PATH/patches/after_compile.sh || :
+          
+          TARGET_DIR=$(ls -d "$BUILD_ROOT"/bin/targets/*/* 2>/dev/null | head -n 1); [ -z "$TARGET_DIR" ] && exit 1 || cd "$TARGET_DIR"
+          rm -rf packages
+          [ -f sha256sums ] && sed -i -E "/[[:space:]]\*?([^/]*\.buildinfo|profiles\.json)$/d" sha256sums
+          rm -f *.buildinfo profiles.json
+          
+          BUILD_DATE=$(date +"%Y%m%d%H%M")
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "RELEASE_TAG=${{ env.CONFIG_NAME }}-$BUILD_DATE" >> $GITHUB_ENV
+          echo "status=success" >> $GITHUB_OUTPUT
+          
+          echo "## OpenWrt 编译日志" > $GITHUB_WORKSPACE/release_body.md
+          echo "* **编译时间**：$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_WORKSPACE/release_body.md
+          echo "* **配置方案**：${{ env.CONFIG_NAME }}" >> $GITHUB_WORKSPACE/release_body.md
+          echo "* **文件列表**：" >> $GITHUB_WORKSPACE/release_body.md
+          ls -lh | awk '!/(^total|sha256sums)/ {print "  * ["$NF"] ("$5")"}' >> $GITHUB_WORKSPACE/release_body.md
+
+      - name: Publish to GitHub Releases
+        uses: ncipollo/release-action@v1
+        if: steps.compile.outputs.status == 'success'
+        with:
+          token: ${{ github.token }}
+          tag: ${{ env.RELEASE_TAG }}
+          name: "OpenWrt Firmware | ${{ env.RELEASE_TAG }}"
+          bodyFile: ${{ github.workspace }}/release_body.md
+          artifacts: "${{ env.FIRMWARE }}/*"
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+
+      - name: Delete Old Workflow Runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 2
