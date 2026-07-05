@@ -7,7 +7,7 @@ vi feeds.conf.default
 ./scripts/feeds install -a
 make menuconfig
 
-./scripts/diffconfig.sh > diffconfig
+./scripts/diffconfig.sh
 ```
 
 **References:**
