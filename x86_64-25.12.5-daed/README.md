@@ -59,6 +59,8 @@
 >     - [x] wget-ssl
 >   - Routing and Redirection
 >     - [x] ip-full
+>   - SSH
+>     - [x] openssh-sftp-server
 >   - Web Servers/Proxies
 >     - [x] dae
 >     - [x] daed
