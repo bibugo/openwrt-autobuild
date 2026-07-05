@@ -107,14 +107,14 @@ jobs:
           
           [ -d $CONFIG_PATH/patches ] && chmod +x $CONFIG_PATH/patches/*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
-          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
-          [ -f $CONFIG_PATH/.config ] && cp $CONFIG_PATH/.config ./.config || :
           
           [ -f $CONFIG_PATH/patches/before_feeds.sh ] && $CONFIG_PATH/patches/before_feeds.sh || :
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           [ -f $CONFIG_PATH/patches/after_feeds.sh ] && $CONFIG_PATH/patches/after_feeds.sh || :
           
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
+          [ -f $CONFIG_PATH/.config ] && cp $CONFIG_PATH/.config ./.config || :
           make defconfig
           [ -f $CONFIG_PATH/patches/post_config.sh ] && $CONFIG_PATH/patches/post_config.sh || :
 
