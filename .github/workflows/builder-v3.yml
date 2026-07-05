@@ -1,4 +1,4 @@
-name: OpenWrt Builder v3.0.0
+name: OpenWrt Builder v3.0.1
 run-name: "build ${{ inputs.build }}"
 
 on:
@@ -107,16 +107,16 @@ jobs:
           
           [ -d $CONFIG_PATH/patches ] && chmod +x $CONFIG_PATH/patches/*.sh || :
           [ -f $CONFIG_PATH/feeds.conf.default ] && mv $CONFIG_PATH/feeds.conf.default ./feeds.conf.default
-          [ -f $CONFIG_PATH/patches/before_feeds.sh ] && $CONFIG_PATH/patches/before_feeds.sh || :
+          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
+          [ -f $CONFIG_PATH/.config ] && cp $CONFIG_PATH/.config ./.config || :
           
+          [ -f $CONFIG_PATH/patches/before_feeds.sh ] && $CONFIG_PATH/patches/before_feeds.sh || :
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          
-          [ -d $CONFIG_PATH/files ] && mv $CONFIG_PATH/files ./files
-          [ -f $CONFIG_PATH/.config ] && mv $CONFIG_PATH/.config ./.config
           [ -f $CONFIG_PATH/patches/after_feeds.sh ] && $CONFIG_PATH/patches/after_feeds.sh || :
           
           make defconfig
+          [ -f $CONFIG_PATH/patches/post_config.sh ] && $CONFIG_PATH/patches/post_config.sh || :
 
       - name: SSH connection (tmate)
         uses: mxschmitt/action-tmate@v3
@@ -127,15 +127,13 @@ jobs:
         id: compile
         run: |
           cd $BUILD_ROOT
-
+          
           make download -j8
           find dl -maxdepth 1 -size -512c -exec rm -f {} \;
           
-          [ -f $CONFIG_PATH/patches/before_compile.sh ] && $CONFIG_PATH/patches/before_compile.sh || :
-          
           echo "$(nproc) threads compilation started"
+          [ -f $CONFIG_PATH/patches/before_compile.sh ] && $CONFIG_PATH/patches/before_compile.sh || :
           make -j$(nproc) || make -j1 V=s || exit 1
-          
           [ -f $CONFIG_PATH/patches/after_compile.sh ] && $CONFIG_PATH/patches/after_compile.sh || :
           
           TARGET_DIR=$(ls -d "$BUILD_ROOT"/bin/targets/*/* 2>/dev/null | head -n 1); [ -z "$TARGET_DIR" ] && exit 1 || cd "$TARGET_DIR"
