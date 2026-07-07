@@ -1,0 +1,25 @@
+config dae 'config'
+	option enabled '1'
+	option config_file '/etc/dae/config.dae'
+	option lan_interface 'br-lan'
+	option log_maxbackups '1'
+	option log_maxsize '1'
+	option wan_interface 'eth0'
+
+config group
+	option name 'proxy'
+	option policy 'fixed(0)'
+	list source 'node_1'
+
+config routing 'routing'
+	option fallback 'proxy'
+	list custom 'dip(11.0.0.0/8) -> direct'
+
+config dns 'dns'
+	option cn_upstream 'udp://dns.alidns.com:53'
+	option fallback_upstream 'tcp+udp://dns.google:53'
+	option response_ttl '0'
+
+config node
+	option link ''
+	option tag 'node_1'

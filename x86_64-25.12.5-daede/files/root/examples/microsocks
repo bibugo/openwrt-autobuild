@@ -1,0 +1,9 @@
+config microsocks 'config'
+	option enabled '1'
+	option bindaddr ''
+	option listenip '0.0.0.0'
+	option port '1080'
+	option user ''
+	option password ''
+	option auth_once '0' # Boolean, must be used together with user/pass
+	option quiet '1'
