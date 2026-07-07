@@ -1,0 +1,3 @@
+config mdns_repeater 'main'
+	list interface 'br-lan'
+	list interface 'eth0'

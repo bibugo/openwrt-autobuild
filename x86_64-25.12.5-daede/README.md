@@ -57,6 +57,8 @@
 >   - File Transfer
 >     - [x] curl
 >     - [x] wget-ssl
+>   - IP Addresses and Names
+>     - [x] mdns-repeater
 >   - Routing and Redirection
 >     - [x] ip-full
 >   - SSH
