@@ -11,10 +11,10 @@ on:
       configuration:
         description: 'Configuration Folder'
         required: true
-        default: 'x86_64-25.12.5-daed'
+        default: 'x86_64-25.12.5-daede'
         type: choice
         options:
-          - x86_64-25.12.5-daed
+          - x86_64-25.12.5-daede
           - x86_64-25.12-pw-mos
           - x86_64-24.10-pw
       runner:
