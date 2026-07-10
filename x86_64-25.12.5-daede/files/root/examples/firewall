@@ -33,6 +33,14 @@ config rule
 	list proto 'tcp'
 	option enabled '1'
 
+config rule
+	option src 'wan'
+	option name 'Allow_mDNS_Inbound'
+	list proto 'udp'
+	option dest_port '5353'
+	option target 'ACCEPT'
+	option family 'ipv4'
+	option enabled '1'
 
 config rule
 	option name 'Allow-DHCP-Renew'
