@@ -16,7 +16,7 @@ config device
 config interface 'lan'
 	option device 'br-lan'
 	option proto 'static'
-	list ipaddr '11.31.0.1/24'
+	list ipaddr '11.30.0.1/24'
 	option multipath 'off'
 	option delegate '1'
 	list ip6addr 'fd16:8be0:d6f5::1/64'
