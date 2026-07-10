@@ -1,4 +1,4 @@
-name: OpenWrt Builder v3.0.1
+name: OpenWrt Builder v3.0.2
 run-name: "build ${{ inputs.build }}"
 
 on:
@@ -30,7 +30,8 @@ on:
       debug:
         description: 'SSH Debug (true/false)'
         required: false
-        default: 'false'
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -120,7 +121,7 @@ jobs:
 
       - name: SSH connection (tmate)
         uses: mxschmitt/action-tmate@v3
-        if: github.event.inputs.debug == 'true'
+        if: ${{ github.event.inputs.debug }}
         timeout-minutes: 30
 
       - name: Compile Firmware
