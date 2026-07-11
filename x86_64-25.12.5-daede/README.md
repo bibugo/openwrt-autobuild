@@ -15,10 +15,10 @@
 > - Global build settings
 >   - Kernel build options
 >     - [x] Compile the kernel with symbol table information
->     - [ ] Reduce debugging information
 >     - [x] Compile the kernel with debug information
 >     - [x] &ensp;&ensp; Enable additional BTF type information
 >     - [x] &ensp;&ensp;&ensp;&ensp; Allow loading modules with non-matching BTF type info
+>     - [ ] &ensp;&ensp; Reduce debugging information
 >     - [x] Compile the kernel with kprobes support
 >     - [x] Compile the kernel with BPF event support
 >     - [x] Support BTF function arguments for probe events
