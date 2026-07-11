@@ -4,19 +4,6 @@ run-name: "build ${{ inputs.build }}"
 on:
   workflow_dispatch:
     inputs:
-      build:
-        description: "Build Tag/Version"
-        type: string
-        required: false
-      configuration:
-        description: 'Configuration Folder'
-        required: true
-        default: 'x86_64-25.12.5-daede'
-        type: choice
-        options:
-          - x86_64-25.12.5-daede
-          - x86_64-25.12-pw-mos
-          - x86_64-24.10-pw
       runner:
         description: 'Runner OS'
         required: true
@@ -32,6 +19,19 @@ on:
         required: false
         default: false
         type: boolean
+      configuration:
+        description: 'Configuration Folder'
+        required: true
+        default: 'x86_64-25.12.5-daede'
+        type: choice
+        options:
+          - x86_64-25.12.5-daede
+          - x86_64-25.12-pw-mos
+          - x86_64-24.10-pw
+      build:
+        description: "Build Tag/Version"
+        type: string
+        required: false
 
 permissions:
   contents: write
